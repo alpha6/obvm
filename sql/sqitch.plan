@@ -2,3 +2,4 @@
 %project=obvm
 %uri=obvm.me
 
+users 2019-01-27T20:43:12Z Denis Fedoseev <denis.fedoseev@gmail.com> # Creates table to track our users.
