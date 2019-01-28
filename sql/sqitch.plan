@@ -3,3 +3,8 @@
 %uri=obvm.me
 
 users 2019-01-27T20:43:12Z Denis Fedoseev <denis.fedoseev@gmail.com> # Creates table to track our users.
+games 2019-01-28T19:49:05Z Denis Fedoseev <denis.fedoseev@gmail.com> # Creates games list
+game_mastres 2019-01-28T19:56:22Z Denis Fedoseev <denis.fedoseev@gmail.com> # Creates games to masters relation
+game_characters 2019-01-28T20:41:52Z Denis Fedoseev <denis.fedoseev@gmail.com> # Creates game characters table
+game_episodes 2019-01-28T20:52:39Z Denis Fedoseev <denis.fedoseev@gmail.com> # Creates game episodes table
+episode_characters 2019-01-28T20:56:35Z Denis Fedoseev <denis.fedoseev@gmail.com> # Creates episode to characters mapping table
