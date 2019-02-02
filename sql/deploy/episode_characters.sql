@@ -2,14 +2,11 @@
 
 BEGIN;
 
-create table episode_characters
-(
-	episode_id integer not null
-		constraint episode_characters_game_episodes_episode_id_fk
-			references game_episodes,
-	character_id integer not null
-		constraint episode_characters_game_characters_character_id_fk
-			references game_characters
+CREATE TABLE `episode_characters` (
+	`episode_id`	INTEGER NOT NULL,
+	`character_id`	INTEGER NOT NULL,
+	FOREIGN KEY(`character_id`) REFERENCES `game_characters`(`character_id`),
+	FOREIGN KEY(`episode_id`) REFERENCES `game_episodes`(`episode_id`)
 );
 
 COMMIT;

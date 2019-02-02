@@ -2,6 +2,6 @@
 
 BEGIN;
 
--- XXX Add DDLs here.
+DROP TABLE episode_characters;
 
 COMMIT;
