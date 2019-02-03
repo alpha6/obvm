@@ -3,6 +3,7 @@
 BEGIN;
 
 CREATE TABLE `episode_characters` (
+    `link_id` INTEGER PRIMARY KEY AUTOINCREMENT,
 	`episode_id`	INTEGER NOT NULL,
 	`character_id`	INTEGER NOT NULL,
 	FOREIGN KEY(`character_id`) REFERENCES `game_characters`(`character_id`),

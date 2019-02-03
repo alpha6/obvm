@@ -1,0 +1,23 @@
+% layout 'default';
+
+<div class="container-fluid">
+        <div class="row page-body">
+            <div class="col-md-4 menu-box">
+%= include 'includes/left_menu';
+            </div>
+            <div class="col-md-8">
+                <p>My Games</p>
+                <% for my $game (@$games_list) { %>
+                    <div class="col-md-8">
+                        <%= $game->game_title %>
+                    </div>
+                <% } %>
+            </div>
+            <div class="col-md-8">
+                <form method=POST action="<%= url_for('game') %>">
+                    <input type=text name=game_title>
+                    <input type=submit value="Add game">
+                </form>
+            </div>
+        </div>
+</div>
