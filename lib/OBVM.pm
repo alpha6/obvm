@@ -90,6 +90,13 @@ sub startup {
     $r->get('/game/:game_id')->over(authenticated => 1)->to('main#get_game_info');
 
 
+    $r->post('/game/:game_id/character')->over(authenticated => 1)->to('main#add_character');
+    $r->get('/game/:game_id/character/:character_id')->over(authenticated => 1)->to('main#get_character_info');
+
+    $r->post('/game/:game_id/episode')->over(authenticated => 1)->to('main#add_episode');
+    $r->get('/game/:game_id/episode/:episode_id')->over(authenticated => 1)->to('main#get_episode_info');
+
+
     $r->get('/*whatever')->over(authenticated => 1)->to('main#index');
     $r->get('/*whatever')->over(authenticated => 0)->to('main#login_form');
 

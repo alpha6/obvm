@@ -7,7 +7,7 @@ CREATE TABLE `game_episodes` (
 	`game_id`	INTEGER NOT NULL,
 	`episode_description`	TEXT NOT NULL,
 	`episode_date`	TEXT NOT NULL,
-	`episode_title`	TEXT
+	`episode_title`	TEXT NOT NULL
 );
 
 COMMIT;

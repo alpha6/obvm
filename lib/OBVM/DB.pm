@@ -79,6 +79,7 @@ sub add_game($self, $game_title, $owner_id) {
         $log->debug(sprintf("New game has added: %s %s owner is %s", $game->{'game_id'}, $game->{'game_title'}, $owner_id));
     });
 
+    return;
 
 }
 
@@ -97,8 +98,19 @@ sub get_game_info($self, $game_id, $user_id) {
             '-columns' => ['u.user_id, u.fullname']
         ], {'u.user_id' => $user_id, 'gm.game_id' => $game_id}, sub{$_->data()});
 
-        $log->debug(Dumper($masters));
+        my $episodes = all_rows('game_episodes', { 'game_id' => $game_id }, sub{$_->data()});
+        my $characters = all_rows('game_characters', { 'game_id' => $game_id}, sub{$_->data()});
+
+        return { masters => $masters, episodes => $episodes, characters => $characters};
     }
+}
+
+sub add_character($self, $game_id, $character_name) {
+    die ("game_id should be a number!") unless ($game_id =~ /\d+/);
+
+    new_row('game_characters', game_id => $game_id, character_name => $character_name);
+
+    return;
 }
 
 # sub save_tag($self, $db_file_id, $tag_name, $tag_value) {

@@ -2,6 +2,9 @@ package OBVM::Controller::Main;
 use Mojo::Base 'Mojolicious::Controller';
 use Data::Dumper;
 
+
+my $log = Mojo::Log->new();
+
 # This action will render a template
 sub index {
   my $self = shift;
@@ -111,6 +114,16 @@ sub get_game_info {
     my $game = $self->db->get_game_info($game_id, $current_user->{'user_id'});
 
     $self->render(game_data => $game);
+}
+
+sub add_character {
+    my $self = shift;
+    my $game_id = $self->param('game_id');
+    my $character_name = $self->req->param('character_name');
+
+    $self->db->add_character($game_id, $character_name);
+
+    $self->redirect_to('/game/'.$game_id);
 }
 
 1;
