@@ -1,0 +1,26 @@
+% layout 'default';
+
+<div class="container">
+    <div class="register">
+        <form method="post" action="<%= url_for('register') %>" >
+            <div>
+            <p>Пожалуйста представьтесь: </p>
+            <p>
+                Полное имя: <input type="text" name="fullname" >
+            </p>
+            <p>
+                Логин: <input type="text" name="username" >
+            </p>
+            <p>
+                Пароль: <input type="password" name="password" >
+            </p>
+            <p>
+                Код приглашения: <input type="text" name="invite" >
+            </p>
+            <p>
+                <input type="submit" value="Register">
+            </p>
+            </div>
+        </form>
+    </div>
+</div>

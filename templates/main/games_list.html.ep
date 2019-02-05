@@ -2,14 +2,15 @@
 
 <div class="container-fluid">
         <div class="row page-body">
-            <div class="col-md-4 menu-box">
+            <div class="col-sm menu-box">
 %= include 'includes/left_menu';
             </div>
+            <div class="container col-sm">
             <div class="col-md-8">
                 <p>My Games</p>
                 <% for my $game (@$games_list) { %>
                     <div class="col-md-8">
-                        <%= $game->game_title %>
+                        <a href="/game/<%= $game->game_id %>"><%= $game->game_title %></a>
                     </div>
                 <% } %>
             </div>
@@ -19,5 +20,7 @@
                     <input type=submit value="Add game">
                 </form>
             </div>
+        </div>
+
         </div>
 </div>
