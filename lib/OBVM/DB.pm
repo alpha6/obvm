@@ -44,13 +44,12 @@ sub get_user ($self, $user_id) {
 }
 
 sub _get_user_by_user_id ($self, $user_id) {
-    my $row = one_row('users', {user_id => $user_id}) || return {};
-    return $row->data(qw/user_id nickname fullname timestamp/)
+    return one_row('users', {user_id => $user_id})->data(qw/user_id nickname fullname timestamp/);
 }
 
 sub _get_user_by_username($self, $username) {
-    my $row = one_row('users', {nickname => $username}) || return {};
-    return $row->data(qw/user_id nickname fullname timestamp/)
+    return one_row('users', {nickname => $username})->data(qw/user_id nickname fullname timestamp/);
+
 }
 
 
@@ -62,7 +61,7 @@ sub add_user($self, $username, $password, $fullname) {
 sub get_user_games($self, $user_id) {
     return all_rows([
         "games g" => -join => "game_masters gm",
-        -columns  => ['g.*', 'gm.user_id']
+        -columns  => ['gm.*', 'g.user_id', ]
     ],
         {'user_id' => $user_id}
     );
@@ -81,14 +80,14 @@ sub add_game($self, $game_title, $owner_id) {
 
 sub get_game_info($self, $game_id, $user_id) {
     my $is_game_master = one_row(
-        'game_masters', { user_id => $user_id, 'gm.game_id' => $game_id});
-    if ($is_game_master) {
-        my $masters = all_rows([
-            'users u' => '-join' => 'game_masters gm',
-            '-columns' => ['u.fullname']
-        ], {'gm.user_id' => $user_id, 'gm.game_id' => $game_id}, sub { $_->data()});
-        $log->debug(Dumper($masters));
-    }
+        'game_masters', { user_id => $user_id, 'game_id' => $game_id});
+    # if ($is_game_master) {
+    #     my $masters = all_rows([
+    #         'users u' => '-join' => 'game_masters gm',
+    #         '-columns' => ['gm.user_id', 'u.user_id']
+    #     ], {'u.user_id' => $user_id, 'gm.game_id' => $game_id});
+    #     $log->debug(Dumper($masters));
+    # }
 }
 
 # sub save_tag($self, $db_file_id, $tag_name, $tag_value) {
