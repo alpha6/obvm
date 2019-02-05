@@ -20,13 +20,9 @@ sub new {
     my $class = shift;
     my $db_file = shift;
 
-    my $dbix = DBIx::Struct::connect(sprintf('dbi:SQLite:dbname=%s', $db_file),"","");
+    DBIx::Struct::connect(sprintf('dbi:SQLite:dbname=%s', $db_file),"","");
 
-
-
-    my $self = {
-        dbix_connector => $dbix,
-    };
+    my $self = {};
     bless $self, $class;
     return $self;
 }
@@ -44,10 +40,14 @@ sub get_user ($self, $user_id) {
 }
 
 sub _get_user_by_user_id ($self, $user_id) {
+    die("user_id should be a number!") unless ($user_id =~ /\d+/);
+
     return one_row('users', {user_id => $user_id})->data(qw/user_id nickname fullname timestamp/);
 }
 
 sub _get_user_by_username($self, $username) {
+    die("user_id should be a number!") unless (ref $username eq 'SCALAR');
+
     return one_row('users', {nickname => $username})->data(qw/user_id nickname fullname timestamp/);
 
 }
@@ -59,6 +59,8 @@ sub add_user($self, $username, $password, $fullname) {
 }
 
 sub get_user_games($self, $user_id) {
+    die("user_id should be a number!") unless ($user_id =~ /\d+/);
+
     return all_rows([
         "games g" => -join => "game_masters gm",
         -columns  => ['gm.*', 'g.user_id', ]
@@ -68,6 +70,8 @@ sub get_user_games($self, $user_id) {
 }
 
 sub add_game($self, $game_title, $owner_id) {
+    die("owner_id should be a number!") unless ($owner_id =~ /\d+/);
+
     connector->txn(sub {
         my $game = new_row('games', game_title => $game_title)->data();
         new_row('game_masters', game_id => $game->{'game_id'}, user_id => $owner_id, is_game_owner => 1);
@@ -79,15 +83,22 @@ sub add_game($self, $game_title, $owner_id) {
 }
 
 sub get_game_info($self, $game_id, $user_id) {
+    die("user_id should be a number!") unless ($user_id =~ /\d+/);
+    die("game_id should be a number!") unless ($game_id =~ /\d+/);
+
+    $log->debug(sprintf("game_id %s user_id %s", $game_id,$user_id));
+
     my $is_game_master = one_row(
         'game_masters', { user_id => $user_id, 'game_id' => $game_id});
-    # if ($is_game_master) {
-    #     my $masters = all_rows([
-    #         'users u' => '-join' => 'game_masters gm',
-    #         '-columns' => ['gm.user_id', 'u.user_id']
-    #     ], {'u.user_id' => $user_id, 'gm.game_id' => $game_id});
-    #     $log->debug(Dumper($masters));
-    # }
+
+    if ($is_game_master) {
+        my $masters = all_rows([
+            'users u' => '-join' => 'game_masters gm',
+            '-columns' => ['u.user_id, u.fullname']
+        ], {'u.user_id' => $user_id, 'gm.game_id' => $game_id}, sub{$_->data()});
+
+        $log->debug(Dumper($masters));
+    }
 }
 
 # sub save_tag($self, $db_file_id, $tag_name, $tag_value) {

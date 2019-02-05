@@ -107,7 +107,8 @@ sub get_game_info {
     my $self = shift;
     my $game_id = $self->param('game_id');
     my $current_user = $self->current_user();
-    my $game = $self->db->get_game_info($game_id, $current_user);
+
+    my $game = $self->db->get_game_info($game_id, $current_user->{'user_id'});
 
     $self->render(game_data => $game);
 }
