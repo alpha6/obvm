@@ -5,13 +5,17 @@ use v5.20;
 use strict;
 use warnings;
 
+our $VERSION = version->declare('v0.0.2');
+
 use feature qw(signatures say);
 no warnings qw(experimental::signatures);
 
 use Data::Dumper;
 use DBIx::Struct qw(connector);
+use Digest::SHA;
 
 use Mojo::Log;
+
 
 
 my $log = Mojo::Log->new();
@@ -28,7 +32,8 @@ sub new {
 }
 
 sub check_user ($self, $nickname, $password) {
-    return one_row([users => -column => 'user_id'], { nickname => $nickname, password => $password });
+    my $digest = $self->_gen_hash($password);
+    return one_row([users => -column => 'user_id'], { nickname => $nickname, password => $digest->hexdigest() });
 }
 
 sub get_user ($self, $user_id) {
@@ -46,7 +51,7 @@ sub _get_user_by_user_id ($self, $user_id) {
 }
 
 sub _get_user_by_username($self, $username) {
-    die("user_id should be a number!") unless (ref $username eq 'SCALAR');
+    die("user_id should be a simple scalar!") unless (ref $username eq '');
 
     return one_row('users', {nickname => $username})->data(qw/user_id nickname fullname timestamp/);
 
@@ -54,8 +59,8 @@ sub _get_user_by_username($self, $username) {
 
 
 sub add_user($self, $username, $password, $fullname) {
-    my $row = new_row('users', nickname => $username, password => $password, fullname => $fullname);
-    return $row;
+    my $digest = $self->_gen_hash($password);
+    return new_row('users', nickname => $username, password => $digest->hexdigest(), fullname => $fullname)->data(qw/user_id nickname fullname timestamp/);
 }
 
 sub get_user_games($self, $user_id) {
@@ -72,14 +77,14 @@ sub get_user_games($self, $user_id) {
 sub add_game($self, $game_title, $owner_id) {
     die("owner_id should be a number!") unless ($owner_id =~ /\d+/);
 
+    my $game;
     connector->txn(sub {
-        my $game = new_row('games', game_title => $game_title)->data();
-        new_row('game_masters', game_id => $game->{'game_id'}, user_id => $owner_id, is_game_owner => 1);
-
-        $log->debug(sprintf("New game has added: %s %s owner is %s", $game->{'game_id'}, $game->{'game_title'}, $owner_id));
+        $game = new_row('games', game_title => $game_title)->data();
+        my $mapping = new_row('game_masters', game_id => $game->{'game_id'}, user_id => $owner_id, is_game_owner => 1)->data();
+        $game->{'owner_id'} = $mapping->{'user_id'};
     });
 
-    return;
+    return $game;
 
 }
 
@@ -108,9 +113,22 @@ sub get_game_info($self, $game_id, $user_id) {
 sub add_character($self, $game_id, $character_name) {
     die ("game_id should be a number!") unless ($game_id =~ /\d+/);
 
-    new_row('game_characters', game_id => $game_id, character_name => $character_name);
+    return new_row('game_characters', game_id => $game_id, character_name => $character_name)->data();
+}
 
-    return;
+sub add_episode($self, $game_id, $episode_title) {
+    die ("game_id should be a number!") unless ($game_id =~ /\d+/);
+
+    return new_row('game_episodes', game_id => $game_id, episode_title => $episode_title)->data();
+}
+
+sub update_episode($self, $episode_id, $episode_date, $episode_title, $episode_description) {
+
+}
+
+sub _gen_hash($self, $src) {
+        state $sha = Digest::SHA->new('sha256');
+        return $sha->add($src);
 }
 
 # sub save_tag($self, $db_file_id, $tag_name, $tag_value) {

@@ -20,13 +20,6 @@ sub startup {
         return $db;
     });
 
-    $self->helper(gen_hash => sub {
-        my ($self, $src) = @_;
-        state $sha = Digest::SHA->new('sha256');
-        return $sha->add($src);
-
-    });
-
     my $auth = $self->plugin('authentication' => {
         autoload_user => 1,
         load_user     => sub {
@@ -41,9 +34,7 @@ sub startup {
             my $password  = shift || '';
             my $extradata = shift || {};
 
-            my $digest = $self->gen_hash($password);
-
-            my $user_id = $self->db->check_user( $username, $digest->hexdigest() );
+            my $user_id = $self->db->check_user( $username, $password );
 
             return $user_id;
         },

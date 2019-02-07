@@ -71,8 +71,7 @@ sub register {
             $fullname = $username;
         }
 
-        my $digest = $self->gen_hash($password);
-        $self->db->add_user( $username, $digest->hexdigest(), $fullname );
+        $self->db->add_user( $username, $password, $fullname );
 
         #Authenticate user after add
         if ( $self->authenticate( $username, $password ) ) {
