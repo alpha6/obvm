@@ -92,8 +92,6 @@ sub get_game_info($self, $game_id, $user_id) {
     die("user_id should be a number!") unless ($user_id =~ /\d+/);
     die("game_id should be a number!") unless ($game_id =~ /\d+/);
 
-    $log->debug(sprintf("game_id %s user_id %s", $game_id,$user_id));
-
     my $is_game_master = one_row(
         'game_masters', { user_id => $user_id, 'game_id' => $game_id});
 
@@ -116,14 +114,32 @@ sub add_character($self, $game_id, $character_name) {
     return new_row('game_characters', game_id => $game_id, character_name => $character_name)->data();
 }
 
+sub get_character($self, $character_id) {
+    die ("character_id should be a number!") unless ($character_id =~ /\d+/);
+    return one_row('game_characters', $character_id)->data();
+}
+
 sub add_episode($self, $game_id, $episode_title) {
     die ("game_id should be a number!") unless ($game_id =~ /\d+/);
 
     return new_row('game_episodes', game_id => $game_id, episode_title => $episode_title)->data();
 }
 
-sub update_episode($self, $episode_id, $episode_date, $episode_title, $episode_description) {
+sub get_episode($self, $episode_id) {
+    die ("episode_id should be a number!") unless ($episode_id =~ /\d+/);
 
+    return one_row('game_episodes', $episode_id)->data();
+}
+
+sub update_episode($self, $episode_id, $episode_data) {
+    my $episode = one_row('game_episodes', $episode_id);
+
+    $episode->episode_description($episode_data->{'episode_description'}) if defined $episode_data->{'episode_description'};
+    $episode->episode_date($episode_data->{'episode_date'}) if defined $episode_data->{'episode_date'};
+    $episode->episode_title($episode_data->{'episode_title'}) if defined $episode_data->{'episode_title'};
+    $episode->update;
+
+    return $episode->data();
 }
 
 sub _gen_hash($self, $src) {
