@@ -66,6 +66,7 @@ subtest 'add_game' => sub {
 
 {
     my $char_name = 'Test Character';
+
     subtest 'add_character' => sub {
         my $new_char = $db->add_character(1, $char_name);
         is($new_char->{'character_id'}, 1, 'Character_id is ok');
@@ -121,6 +122,78 @@ subtest 'get_game_info' => sub{
     };
 }
 
+{
+    #add character to episode
+    my $char_name = 'Character Two';
+
+    subtest 'add_character' => sub {
+        my $new_char = $db->add_character(1, $char_name);
+        is($new_char->{'character_id'}, 2, 'Character_id is ok');
+        is($new_char->{'character_name'}, $char_name, 'Character_name is ok');
+    };
+
+    subtest 'add_character_to_episode' => sub {
+        $db->add_character_to_episode(1, 1);
+        $db->add_character_to_episode(1, 2);
+        my $episode = $db->get_episode(1);
+
+        is($episode->{'episode_id'}, 1, 'Episode_id is ok');
+        is(scalar @{$episode->{'involved_characters'}}, 2, 'Two characters has found for episode');
+    };
+
+    subtest 'remove_character_from_episode' => sub {
+
+        $db->remove_character_from_episode(1, 1);
+        my $episode = $db->get_episode(1);
+
+        is($episode->{'episode_id'}, 1, 'Episode_id is ok');
+        is(scalar @{$episode->{'involved_characters'}}, 1, 'One characters lasts for episode');
+        is($episode->{'involved_characters'}[0]{'character_id'}, 2, 'Left the right character');
+        is($episode->{'involved_characters'}[0]{'character_name'}, $char_name, 'Left the right character');
+    };
+}
+
+
+{ #add and remove episode from game
+    my $episode_date = '01.02.0003';
+    my $episode_title = 'Episode Two';
+    my $episode_description = 'It\'s a very long story...';
+    my $target_episode_id = 2;
+
+    subtest 'add_episode' => sub {
+        my $new_episode = $db->add_episode(1, $episode_title);
+        is($new_episode->{'episode_id'}, $target_episode_id, 'Episode_id is ok');
+        is($new_episode->{'episode_title'}, $episode_title, 'Episode_name is ok');
+
+        my $game_info = $db->get_game_info(1, 1);
+        is($game_info->{'episodes'}[0]{'episode_id'}, 1, 'Game has two episodes');
+    };
+
+    subtest 'update_episode' => sub {
+
+        my $episode = $db->update_episode(2, {episode_date => $episode_date, episode_description => $episode_description});
+
+        is($episode->{'episode_id'}, $target_episode_id, 'Episode_id is ok');
+        is($episode->{'episode_title'}, $episode_title, 'Title has updated');
+        is($episode->{'episode_date'}, $episode_date, 'Episode_date is ok');
+        is($episode->{'episode_description'}, $episode_description, 'Episode description has updated');
+    };
+
+    subtest 'check episode update' => sub {
+        my $episode = $db->get_episode($target_episode_id);
+        is($episode->{'episode_title'}, $episode_title, 'Episode title is ok');
+        is($episode->{'episode_description'}, $episode_description, 'Description is ok');
+        is($episode->{'episode_date'}, $episode_date, 'Date is ok');
+    };
+
+    subtest 'remove_episode' => sub {
+        $db->remove_episode($target_episode_id);
+        my $game_info = $db->get_game_info(1, 1);
+        is($game_info->{'episodes'}[0]{'episode_id'}, 1, 'Has one episode now');
+
+    };
+
+}
 
 done_testing();
 

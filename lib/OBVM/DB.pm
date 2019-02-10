@@ -17,14 +17,17 @@ use Digest::SHA;
 use Mojo::Log;
 
 
-
-my $log = Mojo::Log->new();
-
 sub new {
     my $class = shift;
     my $db_file = shift;
 
     DBIx::Struct::connect(sprintf('dbi:SQLite:dbname=%s', $db_file),"","");
+
+    no strict 'refs';
+    for (keys %DBC::) {
+        say STDERR "$_";
+    }
+    use strict 'refs';
 
     my $self = {};
     bless $self, $class;
@@ -125,10 +128,44 @@ sub add_episode($self, $game_id, $episode_title) {
     return new_row('game_episodes', game_id => $game_id, episode_title => $episode_title)->data();
 }
 
-sub get_episode($self, $episode_id) {
+sub remove_episode($self, $episode_id) {
+    die("episode_id should be a number!") unless ($episode_id =~ /\d+/);
+
+    connector->txn(sub {
+        DBC::EpisodeCharacters->delete({ episode_id => $episode_id});
+        DBC::GameEpisodes->delete({ episode_id => $episode_id });
+    });
+    return;
+
+}
+
+sub add_character_to_episode($self, $episode_id, $character_id) {
+    die ("episode_id should be a number!") unless ($episode_id =~ /\d+/);
+    die ("character_id should be a number!") unless ($character_id =~ /\d+/);
+
+    new_row('episode_characters', episode_id => $episode_id,  character_id => $character_id);
+    return;
+}
+
+sub remove_character_from_episode($self, $episode_id, $character_id) {
+    die ("episode_id should be a number!") unless ($episode_id =~ /\d+/);
+    die ("character_id should be a number!") unless ($character_id =~ /\d+/);
+
+    DBC::EpisodeCharacters->delete({episode_id => $episode_id,  character_id => $character_id});
+    return;
+}
+
+sub get_episode($self, $episode_id) { #Returns episode info with involved characters
     die ("episode_id should be a number!") unless ($episode_id =~ /\d+/);
 
-    return one_row('game_episodes', $episode_id)->data();
+    my $episode_data = one_row('game_episodes', $episode_id)->data();
+    my $involved_characters = all_rows([
+        'episode_characters ec' => '-join' => 'game_characters gc',
+        '-columns'              => ['gc.character_name, gc.character_id']
+    ], {episode_id => $episode_id}, sub { $_->data()});
+    $episode_data->{'involved_characters'} = $involved_characters;
+
+    return $episode_data;
 }
 
 sub update_episode($self, $episode_id, $episode_data) {
@@ -139,7 +176,7 @@ sub update_episode($self, $episode_id, $episode_data) {
     $episode->episode_title($episode_data->{'episode_title'}) if defined $episode_data->{'episode_title'};
     $episode->update;
 
-    return $episode->data();
+    return $self->get_episode($episode_id);
 }
 
 sub _gen_hash($self, $src) {
