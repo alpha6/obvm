@@ -71,9 +71,10 @@ sub get_user_games($self, $user_id) {
 
     return all_rows([
         "games g" => -join => "game_masters gm",
-        -columns  => ['gm.*', 'g.user_id', ]
+        -columns  => ['g.*', 'gm.user_id', 'gm.is_game_owner' ]
     ],
-        {'user_id' => $user_id}
+        {'user_id' => $user_id},
+        sub {$_->data()}
     );
 }
 
@@ -88,7 +89,13 @@ sub add_game($self, $game_title, $owner_id) {
     });
 
     return $game;
+}
 
+sub add_master($self, $game_id, $user_id) {
+    die("user_id should be a number!") unless ($user_id =~ /\d+/);
+    die("game_id should be a number!") unless ($game_id =~ /\d+/);
+
+    return new_row('game_masters', game_id => $game_id, user_id => $user_id)->data();
 }
 
 sub get_game_info($self, $game_id, $user_id) {
@@ -101,7 +108,7 @@ sub get_game_info($self, $game_id, $user_id) {
     if ($is_game_master) {
         my $masters = all_rows([
             'users u' => '-join' => 'game_masters gm',
-            '-columns' => ['u.user_id, u.fullname']
+            '-columns' => ['u.user_id, u.fullname', 'gm.is_game_owner']
         ], {'u.user_id' => $user_id, 'gm.game_id' => $game_id}, sub{$_->data()});
 
         my $episodes = all_rows('game_episodes', { 'game_id' => $game_id }, sub{$_->data()});

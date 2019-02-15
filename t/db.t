@@ -95,6 +95,7 @@ subtest 'get_episode' => sub {
 subtest 'get_game_info' => sub{
     my $game_info = $db->get_game_info(1, 1);
     is($game_info->{'masters'}[0]{'user_id'}, 1, 'has game master');
+    is($game_info->{'masters'}[0]{'is_game_owner'}, 1, 'has game owner');
     is($game_info->{'episodes'}[0]{'episode_id'}, 1, 'Has episode');
     is($game_info->{'characters'}[0]{'character_id'}, 1, 'Has characters');
 };
@@ -192,7 +193,34 @@ subtest 'get_game_info' => sub{
         is($game_info->{'episodes'}[0]{'episode_id'}, 1, 'Has one episode now');
 
     };
+}
 
+{ #add and remove game master
+    my $user = 'second_user';
+    my $password = 'password';
+    my $fullname = 'Second Master';
+    my $desired_user_id = 2;
+    my $game_id = 1;
+
+    subtest 'add_user' => sub {
+        my $new_user = $db->add_user($user, $password, $fullname);
+        is($new_user->{'user_id'}, $desired_user_id, 'User created');
+        is($new_user->{'nickname'}, $user, 'Username ok');
+        is($new_user->{'fullname'}, $fullname, 'Fullname ok');
+    };
+
+    subtest 'check has no games' => sub {
+      my $games = $db->get_user_games($desired_user_id);
+        is(scalar @$games, 0, 'No games found');
+    };
+
+    subtest 'add master to game' => sub {
+        $db->add_master($game_id, $desired_user_id);
+        my $games = $db->get_user_games($desired_user_id);
+        is(scalar $games->[0]{'game_id'}, $game_id, 'Game found for user');
+        is(scalar $games->[0]{'is_game_owner'}, 0, 'Not owner');
+        is(scalar $games->[0]{'user_id'}, $desired_user_id, 'Correct user id');
+    };
 }
 
 done_testing();
