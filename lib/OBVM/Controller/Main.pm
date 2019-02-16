@@ -125,4 +125,16 @@ sub add_character {
     $self->redirect_to('/game/'.$game_id);
 }
 
+sub add_episode {
+    my $self = shift;
+    my $game_id = $self->param('game_id');
+    my $episode_title = $self->req->param('episode_title');
+
+    $log->debug("Add episode $game_id $episode_title");
+
+    $self->db->add_episode($game_id, $episode_title);
+
+    $self->redirect_to('/game/'.$game_id);
+}
+
 1;

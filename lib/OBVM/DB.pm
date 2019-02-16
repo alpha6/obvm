@@ -111,11 +111,19 @@ sub get_game_info($self, $game_id, $user_id) {
             '-columns' => ['u.user_id, u.fullname', 'gm.is_game_owner']
         ], {'u.user_id' => $user_id, 'gm.game_id' => $game_id}, sub{$_->data()});
 
-        my $episodes = all_rows('game_episodes', { 'game_id' => $game_id }, sub{$_->data()});
-        my $characters = all_rows('game_characters', { 'game_id' => $game_id}, sub{$_->data()});
+        my $episodes = $self->get_game_episodes($game_id);
+        my $characters = $self->get_game_characters($game_id);
 
         return { masters => $masters, episodes => $episodes, characters => $characters};
     }
+}
+
+sub get_game_episodes($self, $game_id) {
+    return all_rows('game_episodes', { 'game_id' => $game_id }, sub{$_->data()});
+}
+
+sub get_game_characters($self, $game_id) {
+    return all_rows('game_characters', { 'game_id' => $game_id}, sub{$_->data()});
 }
 
 sub add_character($self, $game_id, $character_name) {

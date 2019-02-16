@@ -20,6 +20,10 @@ sub startup {
         return $db;
     });
 
+    $self->helper(log => sub {
+        return $log;
+    });
+
     my $auth = $self->plugin('authentication' => {
         autoload_user => 1,
         load_user     => sub {
@@ -82,10 +86,13 @@ sub startup {
 
 
     $r->post('/game/:game_id/character')->over(authenticated => 1)->to('main#add_character');
+    $r->get('/game/:game_id/characters')->over(authenticated => 1)->to('game#get_characters');
     $r->get('/game/:game_id/character/:character_id')->over(authenticated => 1)->to('main#get_character_info');
 
     $r->post('/game/:game_id/episode')->over(authenticated => 1)->to('main#add_episode');
-    $r->get('/game/:game_id/episode/:episode_id')->over(authenticated => 1)->to('main#get_episode_info');
+    $r->get('/game/:game_id/episodes')->over(authenticated => 1)->to('game#get_episodes');
+    $r->get('/game/:game_id/episode/:episode_id')->over(authenticated => 1)->to('game#get_episode_info');
+    $r->post('/game/:game_id/episode/:episode_id')->over(authenticated => 1)->to('game#update_episode_info');
 
 
     $r->get('/*whatever')->over(authenticated => 1)->to('main#index');

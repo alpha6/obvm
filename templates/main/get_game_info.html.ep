@@ -1,12 +1,5 @@
 % layout 'default';
 
-<div class="container-fluid">
-        <div class="row page-body">
-            <div class="col-sm-1 menu-box">
-%= include 'includes/left_menu';
-            </div>
-            <div class="container col-md">
-
                     <h2>Game info</h2>
                     <div class="col-sm container">
                         <h3>Masters</h3>
@@ -17,17 +10,18 @@
                     <div class="col-sm container">
                         <h3>Episodes</h3>
                         <form method="POST" action="<%= url_for() %>/episode"><input name="episode_title"><input type="submit" value="add"></form>
+<ul>
                         <% for my $episode (@{$game_data->{'episodes'}}) { %>
-                            <%= $episode->{'episode_title'} %>
+<li><a href="<%= url_for() %>/episode/<%= $episode->{'episode_id'} %>"><%= $episode->{'episode_title'} %></a></li>
                         <% } %>
+</ul>
                     </div>
                     <div class="col-sm container">
                         <h3>Characters</h3>
                         <form method="POST" action="<%= url_for() %>/character"><input name="character_name"><input type="submit" value="add"></form>
                         <% for my $character (@{$game_data->{'characters'}}) { %>
-                            <%= $character->{'character_name'} %>
+<ul>
+                            <li><a href="<%= url_for() %>/character"><%= $character->{'character_name'} %></a></li>
+</ul>
                         <% } %>
                     </div>
-            </div>
-        </div>
-</div>

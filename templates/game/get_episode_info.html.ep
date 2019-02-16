@@ -1,0 +1,58 @@
+% layout 'default';
+
+<h3>Episode info</h3>
+<div class="row container">
+    <form method="POST" action="<%= url_for() %>">
+    <div id="episode_title" class="row container">
+        <input type="text" name="episode_title" value="<%= $episode_info->{'episode_title'} %>">
+    </div>
+    <div id="description_container" class="row container">
+        <textarea name="episode_description"><%=  $episode_info->{'episode_description'} %></textarea>
+    </div>
+    <div><button class="btn btn-primary">Обновить</button></div>
+    </form>
+    <div id="involved_characters" class="row container">
+        <ul>
+            <% for my $character (@{$episode_info->{'involved_characters'}}) { %>
+            <li><%= $character->{'character_name'} %></li>
+            <% } %>
+        </ul>
+    </div>
+</div>
+
+<script>
+    var episode
+    # var apiURL = '<%= url_for('get_images') %>'
+    # var hostname = window.location.protocol+"//"+window.location.host;
+    #
+    # var demo = new Vue({
+    #
+    #     el: '#images_list',
+    #     data: {
+    #         imagesList: null,
+    #         pageNumber: 1,
+    #         pagesCount: 5,
+    #         imagesPerPage: 20,
+    #     },
+    #
+    #     created: function () {
+    #        this.fetchData(this.pageNumber)
+    #     },
+    #
+    #     methods: {
+    #         fetchData: function (pageNumber) {
+    #             var xhr = new XMLHttpRequest()
+    #             var self = this
+    #             xhr.open('GET', apiURL+"?page="+pageNumber+"&per-page="+self.imagesPerPage)
+    #             xhr.onload = function () {
+    #                 var result = JSON.parse(xhr.responseText);
+    #                 self.imagesList = result.images_list;
+    #                 console.dir(self.imagesList);
+    #                 self.pagesCount = result.pages_count;
+    #             }
+    #             xhr.send()
+    #         },
+    #     }
+    #
+    # });
+</script>
